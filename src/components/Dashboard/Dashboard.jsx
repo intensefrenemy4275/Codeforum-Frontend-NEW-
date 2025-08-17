@@ -7,7 +7,7 @@ const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 function Dashboard() {
   const [recentPosts, setRecentPosts] = useState([]);
-  const [activeChat, setActiveChat] = useState(false); // Tracks if chat window is open
+  const [chatActive, setChatActive] = useState(false);
 
   useEffect(() => {
     fetchRecentPosts();
@@ -16,49 +16,70 @@ function Dashboard() {
   const fetchRecentPosts = async () => {
     try {
       const response = await fetch(`${API_URL}/feed/recent_post`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch recent posts');
-      }
+      if (!response.ok) throw new Error('Failed to fetch recent posts');
       const data = await response.json();
       setRecentPosts(data);
     } catch (error) {
-      console.error('Error fetching recent posts:', error);
+      console.error(error);
     }
   };
 
-  // Called when user clicks a chat user in UserChatsList
-  const handleChatOpen = () => {
-    setActiveChat(true);
+  const openChat = () => {
+    setChatActive(true);
   };
 
-  // Called from ChatWindow to close chat and go back to posts view
-  const handleBackToPosts = () => {
-    setActiveChat(false);
+  const closeChat = () => {
+    setChatActive(false);
   };
 
   return (
-    <div style={{ display: 'flex', gap: 20, height: '100vh', padding: 20 }}>
-      {!activeChat && (
-        <>
-          {/* Show posts and chat list side-by-side */}
-          <div style={{ flex: 2, overflowY: 'auto', borderRight: '1px solid #ccc', paddingRight: 10 }}>
-            <h2>Recent Posts</h2>
-            {recentPosts.length === 0 ? (
-              <p>No recent posts.</p>
-            ) : (
-              recentPosts.map((post) => <PostItem key={post._id} post={post} />)
-            )}
-          </div>
-
-          <div style={{ flex: 1, borderRight: '1px solid #ccc', padding: '0 10px', overflowY: 'auto' }}>
+    <div style={{
+      height: '100vh',
+      padding: 20,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'flex-start',
+    }}>
+      {!chatActive ? (
+        // POSTS VIEW - Centered posts container only
+        <div style={{
+          width: '60%',
+          maxHeight: '80vh',
+          overflowY: 'auto',
+          border: '1px solid #ccc',
+          padding: 20,
+          borderRadius: 8,
+          boxShadow: '0 0 10px rgba(0,0,0,0.1)'
+        }}>
+          <h2 style={{ marginBottom: 20, textAlign: 'center' }}>Recent Posts</h2>
+          {recentPosts.length === 0 ? (
+            <p style={{ textAlign: 'center' }}>No recent posts.</p>
+          ) : (
+            recentPosts.map(post => <PostItem key={post._id} post={post} />)
+          )}
+        </div>
+      ) : (
+        // CHAT VIEW - Show chat contacts list and chat window side-by-side, filling container
+        <div style={{
+          display: 'flex',
+          width: '80%',
+          height: '80vh',
+          boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+          borderRadius: 8,
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            flex: 1,
+            borderRight: '1px solid #ccc',
+            overflowY: 'auto',
+            padding: 20,
+          }}>
             <h2>Chats</h2>
-            <UserChatsList onChatOpen={handleChatOpen} />
+            <UserChatsList onChatOpen={openChat} />
           </div>
-        </>
-      )}
-      {activeChat && (
-        <div style={{ flex: 1, paddingLeft: 10, display: 'flex', flexDirection: 'column' }}>
-          <ChatWindow onBack={handleBackToPosts} />
+          <div style={{ flex: 2, padding: 20, display: 'flex', flexDirection: 'column' }}>
+            <ChatWindow onBack={closeChat} />
+          </div>
         </div>
       )}
     </div>
