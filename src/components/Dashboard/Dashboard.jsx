@@ -7,7 +7,7 @@ const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 function Dashboard() {
   const [recentPosts, setRecentPosts] = useState([]);
-  const [chatActive, setChatActive] = useState(false);
+  const [view, setView] = useState('home'); // "home" or "chats"
 
   useEffect(() => {
     fetchRecentPosts();
@@ -24,66 +24,54 @@ function Dashboard() {
     }
   };
 
-  const openChat = () => {
-    setChatActive(true);
-  };
-
-  const closeChat = () => {
-    setChatActive(false);
-  };
-
   return (
-    <div style={{
-      height: '100vh',
-      padding: 20,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'flex-start',
-    }}>
-      {!chatActive ? (
-        // POSTS VIEW - Centered posts container only
-        <div style={{
-          width: '60%',
-          maxHeight: '80vh',
-          overflowY: 'auto',
-          border: '1px solid #ccc',
-          padding: 20,
-          borderRadius: 8,
-          boxShadow: '0 0 10px rgba(0,0,0,0.1)'
-        }}>
-          <h2 style={{ marginBottom: 20, textAlign: 'center' }}>Recent Posts</h2>
-          {recentPosts.length === 0 ? (
-            <p style={{ textAlign: 'center' }}>No recent posts.</p>
-          ) : (
-            recentPosts.map(post => <PostItem key={post._id} post={post} />)
-          )}
-        </div>
-      ) : (
-        // CHAT VIEW - Show chat contacts list and chat window side-by-side, filling container
-        <div style={{
-          display: 'flex',
-          width: '80%',
-          height: '80vh',
-          boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-          borderRadius: 8,
-          overflow: 'hidden',
-        }}>
-          <div style={{
-            flex: 1,
-            borderRight: '1px solid #ccc',
-            overflowY: 'auto',
-            padding: 20,
-          }}>
-            <h2>Chats</h2>
-            <UserChatsList onChatOpen={openChat} />
+    <div style={{ display: 'flex', height: '100vh' }}>
+      {/* Sidebar Navigation */}
+      <nav style={{ width: 200, borderRight: '1px solid #ccc', padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <button onClick={() => setView('home')} style={navBtnStyle}>
+          Home
+        </button>
+        <button onClick={() => setView('chats')} style={navBtnStyle}>
+          Chats
+        </button>
+        {/* You can add more navigation buttons like "Create Post", "My Posts" here */}
+      </nav>
+
+      {/* Main Content Area */}
+      <main style={{ flex: 1, padding: 20, overflowY: 'auto' }}>
+        {view === 'home' && (
+          <div style={{ maxWidth: 800, margin: '0 auto' }}>
+            <h2 style={{ textAlign: 'center', marginBottom: 20 }}>Recent Posts</h2>
+            {recentPosts.length === 0
+              ? <p style={{ textAlign: 'center' }}>No recent posts.</p>
+              : recentPosts.map(post => <PostItem key={post._id} post={post} highResImage />)}
           </div>
-          <div style={{ flex: 2, padding: 20, display: 'flex', flexDirection: 'column' }}>
-            <ChatWindow onBack={closeChat} />
+        )}
+        {view === 'chats' && (
+          <div style={{ display: 'flex', height: '80vh', gap: 15 }}>
+            <div style={{ flex: 1, borderRight: '1px solid #ccc', paddingRight: 15 }}>
+              <h2>Chats</h2>
+              <UserChatsList />
+            </div>
+            <div style={{ flex: 2, paddingLeft: 15 }}>
+              <ChatWindow onBack={() => setView('home')} />
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </main>
     </div>
   );
 }
+
+const navBtnStyle = {
+  padding: '12px',
+  border: 'none',
+  borderRadius: 6,
+  background: '#1976d2',
+  color: 'white',
+  fontWeight: 'bold',
+  fontSize: '16px',
+  cursor: 'pointer'
+};
 
 export default Dashboard;
