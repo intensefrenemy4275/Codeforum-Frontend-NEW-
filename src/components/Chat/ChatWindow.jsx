@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect, useRef } from 'react';
 import { AuthContext } from '../../contexts/AuthContext';
 import { ChatContext } from '../../contexts/ChatContext';
 
-export default function ChatWindow() {
+export default function ChatWindow({ onBack }) {
   const { user } = useContext(AuthContext);
   const { messages, sendMessage, currentChatId } = useContext(ChatContext);
   const [newMessage, setNewMessage] = useState('');
@@ -16,10 +16,12 @@ export default function ChatWindow() {
 
   const handleSend = (e) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !currentChatId) return;
+
     const otherUserId = currentChatId
-      ?.split('_')
+      .split('_')
       .find((id) => id !== user._id);
+
     sendMessage(user._id, otherUserId, newMessage.trim());
     setNewMessage('');
   };
@@ -29,8 +31,11 @@ export default function ChatWindow() {
   }
 
   return (
-    <div className="chat-window" style={{ border: '1px solid #ccc', padding: 10 }}>
-      <div className="messages" style={{ height: 300, overflowY: 'auto', marginBottom: 10 }}>
+    <div className="chat-window" style={{ border: '1px solid #ccc', padding: 10, height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <button onClick={onBack} style={{ marginBottom: 10, alignSelf: 'flex-start' }}>
+        ← Back to Posts
+      </button>
+      <div className="messages" style={{ flexGrow: 1, overflowY: 'auto', marginBottom: 10 }}>
         {messages.length === 0 && <p>No messages yet. Start the conversation!</p>}
         {messages.map((msg, idx) => (
           <div
@@ -38,23 +43,27 @@ export default function ChatWindow() {
             style={{
               textAlign: msg.from === user._id ? 'right' : 'left',
               marginBottom: 5,
+              padding: '4px 8px',
+              borderRadius: 8,
+              backgroundColor: msg.from === user._id ? '#dcf8c6' : '#f1f0f0',
+              maxWidth: '80%',
+              alignSelf: msg.from === user._id ? 'flex-end' : 'flex-start',
             }}
           >
-            <b>{msg.from === user._id ? 'Me' : 'Them'}: </b>
             {msg.text || msg}
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
-      <form onSubmit={handleSend}>
+      <form onSubmit={handleSend} style={{ display: 'flex', gap: 8 }}>
         <input
           type="text"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Type a message..."
-          style={{ width: '80%' }}
+          style={{ flexGrow: 1, padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
         />
-        <button type="submit" style={{ width: '18%', marginLeft: '2%' }}>
+        <button type="submit" style={{ padding: '8px 16px', borderRadius: 4 }}>
           Send
         </button>
       </form>

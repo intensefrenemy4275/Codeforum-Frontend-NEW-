@@ -4,7 +4,7 @@ import { ChatContext } from '../../contexts/ChatContext';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
-export default function UserChatsList() {
+export default function UserChatsList({ onChatOpen }) {
   const { user } = useContext(AuthContext);
   const { joinChat, currentChatId } = useContext(ChatContext);
   const [mutualUsers, setMutualUsers] = useState([]);
@@ -28,17 +28,19 @@ export default function UserChatsList() {
   const handleStartChat = (otherUser) => {
     if (user) {
       joinChat(user._id, otherUser._id);
+      if (typeof onChatOpen === 'function') {
+        onChatOpen();  // Notify Dashboard to show chat window in fullscreen mode
+      }
     }
   };
 
   return (
     <div className="user-chats-list">
-      <h2>Chats</h2>
       {mutualUsers.length === 0 && <p>No chat contacts found.</p>}
       <ul>
         {mutualUsers.map((u) => (
-          <li 
-            key={u._id} 
+          <li
+            key={u._id}
             style={{ fontWeight: currentChatId?.includes(u._id) ? 'bold' : 'normal', cursor: 'pointer' }}
             onClick={() => handleStartChat(u)}
           >
