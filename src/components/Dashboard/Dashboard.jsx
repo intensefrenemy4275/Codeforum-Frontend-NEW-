@@ -7,7 +7,7 @@ const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 function Dashboard() {
   const [recentPosts, setRecentPosts] = useState([]);
-  const [view, setView] = useState('home'); // "home" or "chats"
+  const [view, setView] = useState('home');
 
   useEffect(() => {
     fetchRecentPosts();
@@ -34,18 +34,19 @@ function Dashboard() {
         <button onClick={() => setView('chats')} style={navBtnStyle}>
           Chats
         </button>
-        {/* You can add more navigation buttons like "Create Post", "My Posts" here */}
+        {/* Add more navigation buttons here as needed */}
       </nav>
-
       {/* Main Content Area */}
       <main style={{ flex: 1, padding: 20, overflowY: 'auto' }}>
         {view === 'home' && (
-          <div style={{ maxWidth: 800, margin: '0 auto' }}>
-            <h2 style={{ textAlign: 'center', marginBottom: 20 }}>Recent Posts</h2>
-            {recentPosts.length === 0
-              ? <p style={{ textAlign: 'center' }}>No recent posts.</p>
-              : recentPosts.map(post => <PostItem key={post._id} post={post} highResImage />)}
-          </div>
+          <>
+            <h2 style={{ marginBottom: 20, textAlign: 'center' }}>Recent Posts</h2>
+            {recentPosts.length === 0 ? (
+              <p style={{ textAlign: 'center' }}>No recent posts.</p>
+            ) : (
+              recentPosts.map(post => <PostItem key={post._id} post={post} />)
+            )}
+          </>
         )}
         {view === 'chats' && (
           <div style={{ display: 'flex', height: '80vh', gap: 15 }}>
