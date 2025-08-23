@@ -8,6 +8,7 @@ const SOCKET_SERVER_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:
 export const ChatProvider = ({ children, token }) => {
   const [currentChatId, setCurrentChatId] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [otherUser , setOtherUser] = useState({});
   const socket = useRef(null);
 
   // Initialize socket with auth token for backend validation
@@ -43,7 +44,8 @@ export const ChatProvider = ({ children, token }) => {
   }, [token]);
 
   // Function to join a chat room (with two user IDs)
-  const joinChat = (currentUserId, otherUserId) => {
+  const joinChat = (currentUserId, otherUserId,otherUser) => {
+    setOtherUser(otherUser);
     if (socket.current && currentUserId && otherUserId) {
       setMessages([]);
       const roomId = [currentUserId, otherUserId].sort().join('_');
@@ -65,7 +67,7 @@ export const ChatProvider = ({ children, token }) => {
   };
 
   return (
-    <ChatContext.Provider value={{ currentChatId, messages, joinChat, sendMessage }}>
+    <ChatContext.Provider value={{ currentChatId, messages,otherUser, joinChat, sendMessage }}>
       {children}
     </ChatContext.Provider>
   );
